@@ -1,17 +1,14 @@
 // read command line arguments
-var configuration_file = process.argv[1]
-var program_id = process.argv[2]
+var configuration_file = process.argv[2];
+var program_id = process.argv[3];
 
 // read configuration into an array
-var configuration;
 fs = require('fs');
-fs.readFile(configuration_file, 'utf8', function(err, contents) {
-	configuration = contents.split(' ');
-});
+var nodes = fs.readFileSync(configuration_file, 'utf8').split('\n');
 
 // find the port assigned for this node
 var port;
-configuration.forEach(function(line) {
+nodes.forEach(function(line) {
 	if (line.split(' ')[0] == program_id) {
 		port = line.split(' ')[2]; 
 	}
@@ -57,8 +54,28 @@ for (var i = 0; i < clock.length; i++) {
 	clock[i] = 0;
 }
 
+var WebSocketClient = require('websocket').client;
+var client = new WebSocketClient();
+
+// exit when connection is refused
+client.on('connectFailed', function(error) {
+	console.log("Attempted to connect to a terminated node. Exiting.");
+	process.exit();
+});
+
+// send a message when a connection has been established
+client.on('connect', function(connection) {
+	connection.send({
+		id: program_id,
+		clock: clock
+	});
+
+	console.log("s " + nodes[target_index].split(' ')[0] + " [" + clock.join(' ') + ']');
+});
+
+// increment own clock by 1-5
 function local_event() {
-	clock_increase = random.randint(1, 5);
+	clock_increase = Math.floor((Math.random() * 5) + 1); 
 	clock[program_id] += clock_increase;
 
 	console.log("l " + clock_increase);
@@ -73,20 +90,20 @@ function send_message() {
 		}
 	}
 
-	var ws = new WebSocket("ws://" + nodes[target_id].split(' ')[1] + ":" + nodes[target_id].split(' ')[2], 'echo-protocol');
-	ws.send({
-		id: program_id,
-		clock: clock
-	});
-
-	console.log("s " + nodes[target_index].split(' ')[0] + " [" + clock.join(' ') + ']');
+	// connect to target server, client callback will handle sending
+	client.connect("ws://" + nodes[target_id].split(' ')[1] + ":" + nodes[target_id].split(' ')[2], 'echo-protocol');
 }
 
-for (var i = 0; i < 100; i++) {
-	// randomly choose to either perform a local event or send a message
-	if (Math.random() < 0.5) {
-		local_event();
-	} else {
-		send_message();
+console.log("Sleeping ten seconds in order for the user to start all nodes.");
+setTimeout(function() {
+    console.log("Executing vector clock.");
+
+    for (var i = 0; i < 100; i++) {
+		// randomly choose to either perform a local event or send a message
+		if (Math.random() < 0.5) {
+			local_event();
+		} else {
+			send_message();
+		}
 	}
-}
+}, 10000);
