@@ -2,9 +2,11 @@
 var configuration_file = process.argv[2];
 var program_id = process.argv[3];
 
-// read configuration into an array
+// read configuration into an array and remove possible empty lines
 fs = require('fs');
-var nodes = fs.readFileSync(configuration_file, 'utf8').split('\n');
+var nodes = fs.readFileSync(configuration_file, 'utf8').split('\n').filter(function(node) {
+	return node != '';
+});
 
 // find the port assigned for this node
 var port;
@@ -20,31 +22,32 @@ if (port == undefined) {
 }
 
 // start a server
-var http = require('http');
-var server = http.createServer(function(request, response) {});
-server.listen(port)
+var server = require('websocket').server, http = require('http');
 
-// create a websocket
-var WebSocketServer = require('websocket').server;
-wsServer = new WebSocketServer({
-	httpServer: server
+// create a websocket for the server
+var server_socket = new server({
+    httpServer: http.createServer().listen(port)
 });
 
 // accept incoming connections
-wsServer.on('request', function(r) {
-	var connection = r.accept('echo-protocol', r.origin);
+server_socket.on('request', function(request) {
+	var connection = request.accept('echo-protocol', request.origin);
 
 	// receive incoming messages from the connection
 	connection.on('message', function(message) {
+		received_data = JSON.parse(message.utf8Data);
+
 		for (var i = 0; i < clock.length; i++) {
 			if (i != program_id) {
-				clock[i] = Math.max(clock[i], message.clock[i]);
+				clock[i] = Math.max(clock[i], received_data.clock[i]);
 			} else {
 				clock[i] = clock[i] + 1;
 			}
 		}
 
-		console.log("r " + message.id + "[ " + message.clock.join(' ') + "] [" + message.clock.join(' ') + "]");
+		console.log("r " + received_data.id + " [" + received_data.clock.join(' ') + "] [" + clock.join(' ') + "]");
+
+		connection.close();
 	});
 });
 
@@ -65,45 +68,66 @@ client.on('connectFailed', function(error) {
 
 // send a message when a connection has been established
 client.on('connect', function(connection) {
-	connection.send({
-		id: program_id,
-		clock: clock
-	});
+	function send_clock() {
+        if (connection.connected) {
+        	var message = {
+				id: program_id,
+				clock: clock
+			}
 
-	console.log("s " + nodes[target_index].split(' ')[0] + " [" + clock.join(' ') + ']');
+            connection.sendUTF(JSON.stringify(message));
+            setTimeout(send_clock, 1000);
+        }
+    }
+    send_clock();
 });
+
+var random = require('random-js')();
 
 // increment own clock by 1-5
 function local_event() {
-	clock_increase = Math.floor((Math.random() * 5) + 1); 
+	var clock_increase = random.integer(1, 5);
 	clock[program_id] += clock_increase;
 
 	console.log("l " + clock_increase);
 }
 
 function send_message() {
-	var target_id;
-	while (!target_id) {
-		var next_id = Math.floor(Math.random() * (nodes.length-1));
+	var target_id = -1;
+	while (target_id < 0) {
+		var next_id = random.integer(0, nodes.length-1);
 		if (next_id != program_id) {
 			target_id = next_id;
 		}
 	}
 
 	// connect to target server, client callback will handle sending
-	client.connect("ws://" + nodes[target_id].split(' ')[1] + ":" + nodes[target_id].split(' ')[2], 'echo-protocol');
+	var address = "ws://" + nodes[target_id].split(' ')[1] + ":" + nodes[target_id].split(' ')[2] + "/";
+	client.connect(address, 'echo-protocol');
+
+	console.log("s " + nodes[target_id].split(' ')[0] + " [" + clock.join(' ') + ']');
 }
 
-console.log("Sleeping ten seconds in order for the user to start all nodes.");
-setTimeout(function() {
-    console.log("Executing vector clock.");
+function choose_event(iterations_left) {
+	setTimeout(function() {
+		if (iterations_left < 1) {
+			process.exit();
+		}
 
-    for (var i = 0; i < 100; i++) {
 		// randomly choose to either perform a local event or send a message
 		if (Math.random() < 0.5) {
 			local_event();
 		} else {
 			send_message();
 		}
-	}
+
+		choose_event(iterations_left - 1)
+	}, 1000)
+}
+
+console.log("Sleeping ten seconds in order for the user to start all nodes.");
+setTimeout(function() {
+    console.log("Executing vector clock.");
+
+    choose_event(10);
 }, 10000);
