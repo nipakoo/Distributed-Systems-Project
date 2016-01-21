@@ -1,4 +1,4 @@
-0 127.0.0.1 5555
-1 127.0.0.1 6666
-2 127.0.0.1 7777
-3 127.0.0.1 8888
+0 ukko188.hpc.cs.helsinki.fi 4444
+1 ukko191.hpc.cs.helsinki.fi 5555
+2 ukko119.hpc.cs.helsinki.fi 6666
+3 ukko182.hpc.cs.helsinki.fi 7777

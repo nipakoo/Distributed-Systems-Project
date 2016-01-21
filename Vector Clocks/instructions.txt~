@@ -1,0 +1,10 @@
+Specify participating nodes and used ports in conf.txt.
+
+Run command
+$ node clock.js conf.txt 0
+
+where
+
+$ node (program file) (configuration file) (node id)
+
+Each node will start server and wait ten seconds to give user some time to start other nodes. After ten seconds each node will start executing vector clock algorithm.

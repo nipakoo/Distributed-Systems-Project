@@ -1,3 +1,9 @@
+/*
+	NAME: Niko Kortström
+	STUDENT NUMBER: 014154573
+	EMAIL: niko.kortstrom@helsinki.fi
+*/
+
 // read command line arguments
 var configuration_file = process.argv[2];
 var program_id = process.argv[3];
@@ -111,6 +117,7 @@ function send_message() {
 function choose_event(iterations_left) {
 	setTimeout(function() {
 		if (iterations_left < 1) {
+			console.log("Completed given number of iterations. Exiting");
 			process.exit();
 		}
 
@@ -129,5 +136,5 @@ console.log("Sleeping ten seconds in order for the user to start all nodes.");
 setTimeout(function() {
     console.log("Executing vector clock.");
 
-    choose_event(10);
+    choose_event(100);
 }, 10000);
