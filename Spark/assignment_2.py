@@ -14,7 +14,7 @@ conf = (SparkConf()
         .setAppName(AppName)
         .set("spark.rdd.compress", "true")
         .set("spark.broadcast.compress", "true")
-        .set("spark.cores.max", 60)
+        .set("spark.cores.max", 20)
         .set("spark.local.dir", TMPDIR))
 sc = SparkContext(conf = conf)
 
@@ -67,8 +67,6 @@ if __name__=="__main__":
     matrix_1 = sc.parallelize(matrix_1)
     # matrix_1 now contains matrix A x AT x A as an array that could be formatted for an output
     print matrix_1.count()
-
-    diag_file.close()
 
     matrix_3 = data.map(lambda row: map(float, row.split(' ')))
     matrix_2 = sc.parallelize(matrix_2).cartesian(matrix_3)
