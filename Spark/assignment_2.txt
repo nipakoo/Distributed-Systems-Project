@@ -1,0 +1,3 @@
+I have solved the problem of matrix multiplication with the help of cartesian() function. Firstly I need to get the matrix as an array of cols, to be able to access cols of the first matrix to be combined with rows of the second one. With cartesian(), I get an array where each index consists of a row and col needed to calculate the element resulting from matrix multiplication for that position. Then I just have to map through the pairs and perform the calculation. Now I have an array that contains values by increasing order by index like this (0,0), (0,1) ... (0,n), (1,0), (1, 1)...
+
+For the problem of diagonal, I just loop through the matrix and just change all values except every 1001th to zero (since it is a 1000x1000 matrix).
