@@ -27,7 +27,7 @@ def calculate_element(col, row):
     return result
 
 if __name__=="__main__":
-    data = sc.textFile('/cs/work/scratch/spark-data/data-2-sample.txt')
+    data = sc.textFile('/cs/work/scratch/spark-data/data-2.txt')
 
     data = data.map(lambda row: map(float, row.split(' ')))
 
@@ -57,25 +57,15 @@ if __name__=="__main__":
     for i in range(0, 1000):
         matrix_2.append(matrix_1[i*1000:(i+1)*1000])
 
-    # write the diagonal of A x AT to a file
-    diag_file = open("assignent_2_2.txt", "w")
     save_element = 0
-
-    arr = []
-    diag_matrix = []
     for i in range(0, len(matrix_1)):
         if i == save_element:
-            arr.append(matrix_1[i])
             save_element += 1001
         else:
-            arr.append[0]
+            matrix_1[i] = 0
 
-        if len(arr) == 1000:
-            diag_matrix.append(arr)
-            arr = []
-
-    # assign matrix diag(A x AT) to matrix_1
-    matrix_1.parallelize(diag_matrix)
+    matrix_1 = sc.parallelize(matrix_1)
+    # matrix_1 now contains matrix A x AT x A as an array that could be formatted for an output
     print matrix_1.count()
 
     diag_file.close()
