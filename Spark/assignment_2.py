@@ -14,7 +14,7 @@ conf = (SparkConf()
         .setAppName(AppName)
         .set("spark.rdd.compress", "true")
         .set("spark.broadcast.compress", "true")
-        .set("spark.cores.max", 20)
+        .set("spark.cores.max", 60)
         .set("spark.local.dir", TMPDIR))
 sc = SparkContext(conf = conf)
 
@@ -25,9 +25,6 @@ def calculate_element(col, row):
         result += col[i] * row[i]
 
     return result
-
-def print_element(element, idx):
-
 
 if __name__=="__main__":
     data = sc.textFile('/cs/work/scratch/spark-data/data-2-sample.txt')
@@ -79,6 +76,7 @@ if __name__=="__main__":
 
     # assign matrix diag(A x AT) to matrix_1
     matrix_1.parallelize(diag_matrix)
+    print matrix_1.count()
 
     diag_file.close()
 
