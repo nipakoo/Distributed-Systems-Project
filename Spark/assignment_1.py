@@ -2,6 +2,9 @@
 import os
 import sys
 
+# NAME: Niko Kortström
+# STUDENT NUMBER: 014154573
+
 AppName = "spark_assignment_1"
 TMPDIR = "/cs/work/scratch/spark-tmp"
 

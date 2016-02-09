@@ -4,6 +4,9 @@ import sys
 
 import numpy as np
 
+# NAME: Niko Kortström
+# STUDENT NUMBER: 014154573
+
 AppName = "spark_assignment_2"
 TMPDIR = "/cs/work/scratch/spark-tmp"
 
