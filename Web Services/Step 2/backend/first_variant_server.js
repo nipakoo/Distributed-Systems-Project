@@ -1,5 +1,7 @@
 // Load the http module to create an http server.
 var express = require('express');
+var fs = require('fs');
+var gnuplot = require('gnuplot');
 var url = require('url');
 
 var app = express();
@@ -13,7 +15,7 @@ function calculate(arg1, arg2, op) {
 	}
 }
 
-app.get("*", function(request, response) {
+app.get("/calculate", function(request, response) {
 	var query = url.parse(request.url, true).query;
 	
 	var arg1 = parseInt(query.arg1);
@@ -27,6 +29,24 @@ app.get("*", function(request, response) {
 	response.jsonp({line: response_string});
 });
 
+app.get("/sine", function(request, response) {
+	var x = url.parse(request.url, true).query.functions;
+
+	gnuplot()
+	    .set('term png')
+	    .set('output "out.png"')
+	    .set('xrange [-pi:pi]')
+	    .set('xtics 400')
+	    .set('zeroaxis')
+	    .plot(x, {end: true})
+	    .on('end', function() {
+	    	var image = fs.readFileSync("out.png");
+			var image_string = new Buffer(image).toString('base64')
+
+			response.jsonp({image_string: image_string});
+	    });
+});
+
 app.listen(8000, function () {
-  console.log("Server running at http://127.0.0.1:8000/");
+  	console.log("Server running at http://127.0.0.1:8000/");
 });
