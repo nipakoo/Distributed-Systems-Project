@@ -148,15 +148,18 @@ function sine_click() {
 }
 
 function simplify() {
+	for (var i = 3; i < calculation.length()+1; i++) {
+		var partial_calculation = calculation.slice(0, i);
 
+		var check_calculation
+	}
+
+	$("#calculation").val(calculation.join(" "));
 }
 
 function simplify_click() {
 	var calculation = $("#calculation").val().split(" ");
-
-	var simplified_calculation = "";
-
-	
+	simplify();
 }
 
 $(document).ready(function () {

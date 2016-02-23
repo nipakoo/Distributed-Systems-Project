@@ -1,18 +1,109 @@
-var calculation;
+var result;
 
-function handle_calculation_response(data) {
-	var line = data.line;
-	$("body").append("<p>" + line + "</p>");
+function calculate(arg1, op, arg2) {
+	$.ajax("http://127.0.0.1:8000/", {
+		type: "GET",
+		async: false,
+		data: {
+			"arg1": arg1,
+			"op": op,
+			"arg2": arg2
+		},
+		success: function(data) {
+			result = "" + data.result;
+		}
+	});
+}
 
-	if (calculation.length > 0) {
-		line_array = line.split(" ");
-		send_calculation(line_array[line_array.length-1], calculation.shift(), calculation.shift());
+function process_calculations(calculations) {
+ 	var arg1 = ""+calculations[0];
+	for (var i = 1; i < calculations.length-1; i+=2) {
+		var op = calculations[i];
+		var arg2 = ""+calculations[i+1];
+
+		calculate(arg1, op, arg2);
+
+		arg1 = result;
+	}
+	return result;
+}
+
+function calculation_click() {
+	calculations = $("#calculation").val().split(" ");
+	process_calculations(calculations);
+	$("#result").text(calculations.join(" ") + " = " + result);
+}
+
+function sine_click() {
+	func = $("#sine").val();
+	draw(func);
+}
+
+$(document).ready(function () {
+    $('#calculation_button').click(calculation_click);
+    $('#sine_button').click(sine_click)
+});
+
+// FUNCTIONS FOR PLOTTING
+
+function calculate_sin(x) {
+	var sin = x;
+	var numerator = process_calculations([x,"*",x,"*",x]);
+	var denominator = process_calculations([3,"*",2]);
+
+	for (var i = 4; i < 9; i+=2) {
+		var next = process_calculations([numerator,"/",denominator]);
+
+		if (i % 4 === 0) {
+			sin = process_calculations([sin,"-",next]);
+		} else {
+			sin = process_calculations([sin,"+",next]);
+		}
+
+		console.log(sin);
+
+		numerator = process_calculations([x,"*",x,"*",numerator]);
+		denominator = process_calculations([i+1,"*",i,"*",denominator]);
+	}
+
+	return sin;
+}
+
+function calculate_cos(x) {
+	var cos = 1;
+	var numerator = process_calculations([x,"*",x]);
+	var denominator = 2;
+
+	for (var i = 3; i < 8; i+=2) {
+		var next = process_calculations([numerator,"/",denominator]);
+
+		if (i+1 % 4 === 0) {
+			cos = process_calculations([cos,"-",next]);
+		} else {
+			cos = process_calculations([cos,"+",next]);
+		}
+
+		numerator = process_calculations([x,"*",x,"*",numerator]);
+		denominator = process_calculations([i+1,"*",i,"*",denominator]);
+	}
+
+	return cos;
+}
+
+function calculate_tan(x) {
+	return calculate_sin(x) / calculate_cos(x);
+}
+
+function calculate_y(func, x) {
+	switch (func) {
+		case "sin(x)": return calculate_sin(x);
+		case "cos(x)": return calculate_cos(x);
+		case "tan(x)": return calculate_tan(x);
 	}
 }
 
-function draw(data) {
-	var canvas = document.createElement('canvas');
-	$(canvas).width(640).height(480);
+function draw(func) {
+	var canvas = document.getElementById("graph");
 
 	var axes={}, ctx=canvas.getContext("2d");
 	axes.x0 = .5 + .5*canvas.width;  // x0 pixels from left to x=0
@@ -21,12 +112,10 @@ function draw(data) {
 	axes.doNegativeX = true;
 
 	showAxes(ctx,axes);
-	drawGraph(ctx,axes,"rgb(11,153,11)",1, data.response_array.split(','));
-
-	$("body").append(canvas);
+	drawGraph(ctx,axes,"rgb(11,153,11)",1,func);
 }
 
-function drawGraph (ctx,axes,color,thick,data) {
+function drawGraph (ctx,axes,color,thick,func) {
 	ctx.beginPath();
 	ctx.lineWidth = thick;
 	ctx.strokeStyle = color;
@@ -34,9 +123,9 @@ function drawGraph (ctx,axes,color,thick,data) {
 	var i = 0;
 	for (var x = -3.2; x < 3.2; x+=0.1) {
 		if (x==-3.2) {
-			ctx.moveTo(axes.x0+axes.scale*x,axes.y0+axes.scale*data[i]);
+			ctx.moveTo(axes.x0+axes.scale*x,axes.y0+axes.scale*calculate_y(func,x));
 		} else {
-			ctx.lineTo(axes.x0+axes.scale*x,axes.y0+axes.scale*data[i]);
+			ctx.lineTo(axes.x0+axes.scale*x,axes.y0+axes.scale*calculate_y(func,x));
 		}
 		i++;
 	}
@@ -53,46 +142,3 @@ function showAxes(ctx,axes) {
 	ctx.moveTo(x0,0);    ctx.lineTo(x0,h);  // Y axis
 	ctx.stroke();
 }
-
-function send_calculation(arg1, op, arg2) {
-	$.ajax("http://127.0.0.1:8000/calculate", {
-		type: "GET",
-		data: {
-			"arg1": arg1,
-			"arg2": arg2,
-			"op": op
-		},
-    	crossDomain: true,
-    	dataType: "jsonp",
-		success: handle_calculation_response
-	});
-}
-
-function send_sine(functions) {
-	$.ajax("http://127.0.0.1:8000/sine", {
-		type: "GET",
-		data: {
-			"functions": functions
-		},
-    	crossDomain: true,
-    	dataType: "jsonp",
-		success: draw
-	});
-}
-
-function calculation_click() {
-	calculation = $("#calculation").val().split(" ");
-
-	send_calculation(calculation.shift(), calculation.shift(), calculation.shift());
-}
-
-function sine_click() {
-	var sine = $("#sine").val();
-
-	send_sine(sine);
-}
-
-$(document).ready(function () {
-    $('#calculation_button').click(calculation_click);
-    $('#sine_button').click(sine_click)
-});
