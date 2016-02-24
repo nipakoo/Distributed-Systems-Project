@@ -1,11 +1,13 @@
 var result;
 
 var cache_size = 0;
-
 var cache = [];
 
-// CACHING FUNCTIONS TODO: CHECK THEM
+var messages_sent = 0;
 
+// CACHING FUNCTIONS
+
+// SETS CACHE SIZE AND ADJUSTS THE CURRENT CACHE LENGTH IF NEEDED
 function set_cache_size() {
 	cache_size = parseInt($("#cache_size").val());
 	if (cache_size < cache.length) {
@@ -13,6 +15,9 @@ function set_cache_size() {
 	}
 }
 
+// SET SPECIFIED CALCULATION AND RESULT TO CACHE
+// IF THE CALCULATION ALREADY IS IN CACHE, MOVE IT TO THE FIRST INDEX
+// MAKE SURE THAT CACHE SIZE ISN'T EXCEEDED
 function cache_calculation(calculation, result) {
 	for (var i = 0; i < cache.length; i++) {
 		if (cache[i].calculation == calculation) {
@@ -27,6 +32,7 @@ function cache_calculation(calculation, result) {
 	}
 }
 
+// CHECK IF CACHE CONTAINS THE CALCULATION GIVEN AS PARAMETER AND RETURN ITS RESULT IF FOUND
 function check_cache(calculation) {
 	for (var i = 0; i < cache.length; i++) {
 		if (cache[i].calculation == calculation) {
@@ -38,7 +44,7 @@ function check_cache(calculation) {
 
 // SIMPLIFY FUNTIONS
 
-
+// SIMPLIFY ONCE
 function simplify_click() {
 	var calculation = $("#calculation").val().split(" ");
 
@@ -58,7 +64,7 @@ function simplify_click() {
 
 // CALCULATION FUNCTIONS
 
-
+// CALCULATE A SIGNLE "ATOMIC" CALCULATION
 function calculate(arg1, op, arg2) {
 	var calculation = arg1 + " " + op + " " + arg2;
 	var cached_result = check_cache(calculation);
@@ -66,6 +72,7 @@ function calculate(arg1, op, arg2) {
 	if (cached_result !== undefined) {
 		result = cached_result;
 	} else {
+		console.log("" + cache_size + " " + messages_sent++);
 		$.ajax("http://127.0.0.1:8000/", {
 			type: "GET",
 			async: false,
@@ -83,6 +90,7 @@ function calculate(arg1, op, arg2) {
 	cache_calculation(calculation, result);
 }
 
+// LOOP OVER ALL THE "ATOMIC" CALCULATIONS THE PARAMETER CONTAINS
 function process_calculations(calculations) {
  	var arg1 = ""+calculations[0];
 	for (var i = 1; i < calculations.length-1; i+=2) {
@@ -96,17 +104,20 @@ function process_calculations(calculations) {
 	return result;
 }
 
+// GET INPUT CALCULATION AND CALL PROCESSING
 function calculation_click() {
 	calculations = $("#calculation").val().split(" ");
 	process_calculations(calculations);
 	$("#result").text(calculations.join(" ") + " = " + result);
 }
 
+// GET INPUT FUNCTION AND START DRAWING IT
 function sine_click() {
 	func = $("#sine").val();
 	draw(func);
 }
 
+// SET BUTTON BEHAVIOR
 $(document).ready(function () {
     $('#calculation_button').click(calculation_click);
     $('#sine_button').click(sine_click);
@@ -116,7 +127,6 @@ $(document).ready(function () {
 
 
 // FUNCTIONS FOR PLOTTING
-
 
 function calculate_sin(x) {
 	var sin = x;
@@ -135,8 +145,6 @@ function calculate_sin(x) {
 		numerator = process_calculations([x,"*",x,"*",numerator]);
 		denominator = process_calculations([i+1,"*",i,"*",denominator]);
 	}
-
-	console.log(sin);
 
 	return sin;
 }
@@ -188,16 +196,16 @@ function draw(func) {
 }
 
 function drawGraph (ctx,axes,color,thick,func) {
-	var xx, yy, dx=0.1, x0=axes.x0, y0=axes.y0, scale=axes.scale;
-	var iMax = Math.round((ctx.canvas.width-axes.x0)/dx);
-	var iMin = Math.round(-x0/dx);
+	var xx, yy, x0=axes.x0, y0=axes.y0, scale=axes.scale;
+	var iMax = Math.round((ctx.canvas.width-axes.x0));
+	var iMin = Math.round(-x0);
 
 	ctx.beginPath();
 	ctx.lineWidth = thick;
 	ctx.strokeStyle = color;
 
 	for (var i=iMin;i<=iMax;i++) {
-		xx = dx*i; yy = scale*calculate_y(func,xx/scale);
+		xx = i; yy = scale*calculate_y(func,xx/scale);
 		if (i==iMin) {
 			ctx.moveTo(x0+xx,y0-yy);
 		} else {

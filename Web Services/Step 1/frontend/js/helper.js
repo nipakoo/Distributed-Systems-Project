@@ -1,5 +1,6 @@
 var calculation;
 
+// SET RESULT OF THE LAST CALCULATION TO BE VISIBLE AND CALL NEXT CALCULATION IF NEEDED
 function handle_response(data) {
 	var line = data.line;
 	$("body").append("<p>" + line + "</p>");
@@ -10,6 +11,7 @@ function handle_response(data) {
 	}
 }
 
+// SEND MESSAGE TO BACK END WITH ARG1 OP AND ARG2 TO BE CALCULATED TOGETHER
 function send_request(arg1, op, arg2) {
 	$.ajax("http://127.0.0.1:8000/", {
 		type: "GET",
@@ -24,12 +26,14 @@ function send_request(arg1, op, arg2) {
 	});
 }
 
+// GET VALUE OF CALCULATION FIELD AND SEND CALCULATION REQUEST
 function handle_click() {
 	calculation = $("#calculation").val().split(" ");
 
 	send_request(calculation.shift(), calculation.shift(), calculation.shift());
 }
 
+// SET CLICK BEHAVIOR OF SUBMIT BUTTON
 $(document).ready(function () {
     $('#submit_button').click(handle_click);
 });

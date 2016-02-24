@@ -10,6 +10,7 @@ function handle_calculation_response(data) {
 	}
 }
 
+// ADD SINE RESPONSE TO BE VISIBLE
 function handle_sine_response(data) {
 	$("body").append("<img src=\"data:image/png;base64," + data.image_string + "\"/>");
 }
@@ -28,6 +29,7 @@ function send_calculation(arg1, op, arg2) {
 	});
 }
 
+// SEND SINE PLOTTING REQUEST AND CALL handle_sine_response ON RESPONSE
 function send_sine(functions) {
 	$.ajax("http://127.0.0.1:8000/sine", {
 		type: "GET",
@@ -46,12 +48,14 @@ function calculation_click() {
 	send_calculation(calculation.shift(), calculation.shift(), calculation.shift());
 }
 
+// GET FUNCTION FROM INPUT FIELD AND PROCEED TO SENDING REQUEST
 function sine_click() {
 	var sine = $("#sine").val();
 
 	send_sine(sine);
 }
 
+// SET BUTTON BEHAVIOR
 $(document).ready(function () {
     $('#calculation_button').click(calculation_click);
     $('#sine_button').click(sine_click)

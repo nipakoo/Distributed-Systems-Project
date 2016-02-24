@@ -1,7 +1,6 @@
 // Load the http module to create an http server.
 var express = require('express');
 var fs = require('fs');
-var gnuplot = require('gnuplot');
 var url = require('url');
 
 var app = express();

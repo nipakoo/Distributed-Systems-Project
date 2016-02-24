@@ -30,6 +30,7 @@ function calculation_click() {
 	send_calculation(calculation.shift(), calculation.shift(), calculation.shift());
 }
 
+// SET AXES AND GET SCALE FROM THE SIZE OF CREATED CANVAS
 function draw() {
 	var sine = $("#sine").val();
 	eval("function func(x) { return Math." + sine + "; }");
@@ -49,6 +50,7 @@ function draw() {
 	$("body").append(canvas);
 }
 
+// CALCULATE THE POINTS TO DRAW AND DRAW
 function drawGraph (ctx,axes,func,color,thick) {
 	var xx, yy, dx=0.1, x0=axes.x0, y0=axes.y0, scale=axes.scale;
 	var iMax = Math.round((ctx.canvas.width-x0)/dx);
@@ -65,6 +67,7 @@ function drawGraph (ctx,axes,func,color,thick) {
 	ctx.stroke();
 }
 
+// SHOW AXES SPECIFIED BEFORE
 function showAxes(ctx,axes) {
 	var x0=axes.x0, w=ctx.canvas.width;
 	var y0=axes.y0, h=ctx.canvas.height;

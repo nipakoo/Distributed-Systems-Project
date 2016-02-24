@@ -15,6 +15,7 @@ function calculate(arg1, arg2, op) {
 	}
 }
 
+// ALLOW CROSS ORIGIN
 app.all('/', function(request, response, next) {
 	response.header("Access-Control-Allow-Origin", "*");
 	response.header("Access-Control-Allow-Headers", "X-Requested-With");

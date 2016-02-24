@@ -1,9 +1,10 @@
-// Load the http module to create an http server.
 var express = require('express');
 var url = require('url');
 
+// CREATE SERVER
 var app = express();
 
+// FUNCTION FOR CALCULATING A SINGLE EXPRESSION
 function calculate(arg1, arg2, op) {
 	switch (op) {
 		case "+": return arg1 + arg2;
@@ -13,6 +14,7 @@ function calculate(arg1, arg2, op) {
 	}
 }
 
+// SET SERVER TO ACCEPT ALL PATHS, CALL CALCULATE FUNCTION WITH THE ARGUMENTS RECEIVED AND RESPOND WITH RESULT
 app.get("*", function(request, response) {
 	var query = url.parse(request.url, true).query;
 	

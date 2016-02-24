@@ -29,6 +29,7 @@ app.get("/calculate", function(request, response) {
 	response.jsonp({line: response_string});
 });
 
+// ADD RESPONSE TO REQUEST FOR SINE CALCULATION
 app.get("/sine", function(request, response) {
 	var x = url.parse(request.url, true).query.functions;
 

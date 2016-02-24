@@ -1,5 +1,6 @@
 var result;
 
+// SEND A SINGLE CALCULATION REQUEST
 function calculate(arg1, op, arg2) {
 	$.ajax("http://127.0.0.1:8000/", {
 		type: "GET",
@@ -15,6 +16,7 @@ function calculate(arg1, op, arg2) {
 	});
 }
 
+// LOOP OVER ALL SEPARATE CALCULATIONS
 function process_calculations(calculations) {
  	var arg1 = ""+calculations[0];
 	for (var i = 1; i < calculations.length-1; i+=2) {
