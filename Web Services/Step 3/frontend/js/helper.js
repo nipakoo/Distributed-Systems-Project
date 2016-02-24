@@ -28,28 +28,31 @@ function cache_calculation(calculation, result) {
 }
 
 function check_cache(calculation) {
-	var result;
-
 	for (var i = 0; i < cache.length; i++) {
 		if (cache[i].calculation == calculation) {
-			return result;
+			return cache[i].result;
 		}
 	}
 }
 
-function simplify() {
-	for (var i = 3; i < calculation.length()+1; i++) {
-		var partial_calculation = calculation.slice(0, i);
 
-		var check_calculation
-	}
+// SIMPLIFY FUNTIONS
 
-	$("#calculation").val(calculation.join(" "));
-}
 
 function simplify_click() {
 	var calculation = $("#calculation").val().split(" ");
-	simplify();
+
+	cached_result = check_cache(calculation[0] + " " + calculation[1] + " " + calculation[2]);
+
+	if (cached_result !== undefined) {
+		calculation_tail = calculation.slice(3, calculation.length);
+		if (calculation_tail !== undefined) {
+			calculation_tail.unshift(cached_result);
+			$("#calculation").val(calculation_tail.join(" "));
+		} else {
+			$("#calculation").val(cached_result);
+		}
+	}
 }
 
 
@@ -132,6 +135,8 @@ function calculate_sin(x) {
 		numerator = process_calculations([x,"*",x,"*",numerator]);
 		denominator = process_calculations([i+1,"*",i,"*",denominator]);
 	}
+
+	console.log(sin);
 
 	return sin;
 }
