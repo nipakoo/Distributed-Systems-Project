@@ -51,7 +51,7 @@ function calculate_sin(x) {
 	var numerator = process_calculations([x,"*",x,"*",x]);
 	var denominator = process_calculations([3,"*",2]);
 
-	for (var i = 4; i < 9; i+=2) {
+	for (var i = 4; i < 11; i+=2) {
 		var next = process_calculations([numerator,"/",denominator]);
 
 		if (i % 4 === 0) {
@@ -59,8 +59,6 @@ function calculate_sin(x) {
 		} else {
 			sin = process_calculations([sin,"+",next]);
 		}
-
-		console.log(sin);
 
 		numerator = process_calculations([x,"*",x,"*",numerator]);
 		denominator = process_calculations([i+1,"*",i,"*",denominator]);
@@ -74,10 +72,10 @@ function calculate_cos(x) {
 	var numerator = process_calculations([x,"*",x]);
 	var denominator = 2;
 
-	for (var i = 3; i < 8; i+=2) {
+	for (var i = 3; i < 10; i+=2) {
 		var next = process_calculations([numerator,"/",denominator]);
 
-		if (i+1 % 4 === 0) {
+		if ((i+1) % 4 === 0) {
 			cos = process_calculations([cos,"-",next]);
 		} else {
 			cos = process_calculations([cos,"+",next]);
@@ -104,6 +102,7 @@ function calculate_y(func, x) {
 
 function draw(func) {
 	var canvas = document.getElementById("graph");
+	canvas.width = canvas.width;
 
 	var axes={}, ctx=canvas.getContext("2d");
 	axes.x0 = .5 + .5*canvas.width;  // x0 pixels from left to x=0
@@ -116,18 +115,21 @@ function draw(func) {
 }
 
 function drawGraph (ctx,axes,color,thick,func) {
+	var xx, yy, dx=0.1, x0=axes.x0, y0=axes.y0, scale=axes.scale;
+	var iMax = Math.round((ctx.canvas.width-axes.x0)/dx);
+	var iMin = Math.round(-x0/dx);
+
 	ctx.beginPath();
 	ctx.lineWidth = thick;
 	ctx.strokeStyle = color;
 
-	var i = 0;
-	for (var x = -3.2; x < 3.2; x+=0.1) {
-		if (x==-3.2) {
-			ctx.moveTo(axes.x0+axes.scale*x,axes.y0+axes.scale*calculate_y(func,x));
+	for (var i=iMin;i<=iMax;i++) {
+		xx = dx*i; yy = scale*calculate_y(func,xx/scale);
+		if (i==iMin) {
+			ctx.moveTo(x0+xx,y0-yy);
 		} else {
-			ctx.lineTo(axes.x0+axes.scale*x,axes.y0+axes.scale*calculate_y(func,x));
+			ctx.lineTo(x0+xx,y0-yy);
 		}
-		i++;
 	}
 	ctx.stroke();
 }
